@@ -1,18 +1,41 @@
 <html>
+  <head>
+    <title>App</title>
+    <link rel="stylesheet" type="text/css" href="/styles.css">
+  </head>
 
     <body>
-
+      <div class="container">
         <h1>Welcome!</h1>
         <p>
-            <h3>Purchase Item</h3>
-                <p>Enter an imaginary product SKU:</p>
-                <input id='sku'>
-                <button id='purchase'>Purchase Item</button>
-            <h3 id='purchaseResult'></h3>
+          <h3>Purchase Item</h3>
+          <p>Enter an imaginary product SKU:</p>
+          <form action="/submitPurchaseId" method="post">
+            <input type="text" name="inputText" placeholder="Type something..." required>
+            <button type="submit">Purchase Item</button>
+          </form>
         </p>
-
+      </div>
+      <div class="container">
+          <a href="/">Return to login</a>
+      </div>
     </body>
 
-    <script src="./app.js"></script>
+    <script>
+      let purchaseButton = document.getElementById("purchase");
+      purchaseButton.addEventListener("click", purchase);
+
+      function purchase() {
+
+        console.log("purchase");
+        var sku = document.getElementById("sku").value;
+
+        // Purchase flow here
+        // TODO
+
+        purchaseResult.innerText = "Purchased product: " + sku;
+
+      }
+    </script>
 
 </html>

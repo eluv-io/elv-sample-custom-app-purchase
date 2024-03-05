@@ -9,6 +9,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "@eluvio/elv-client-js": "^4.0.79",
     "express": "^4.18.3"
   }
 }
