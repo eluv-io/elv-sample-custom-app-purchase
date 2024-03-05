@@ -5,6 +5,8 @@ const app = express();
 const port = 8080;
 const host = '127.0.0.1';
 
+app.use(express.static('src'));
+
 app.get('/', (req, res) => {
   res.sendFile(__dirname + "/login.html");
 })
