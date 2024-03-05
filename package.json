@@ -1,0 +1,14 @@
+{
+  "name": "elv-sample-custom-app-purchase",
+  "version": "1.0.0",
+  "description": "Eluvio Media Wallet - Sample Custom App",
+  "main": "index.js",
+  "scripts": {
+    "serve": "node index.js"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.3"
+  }
+}
