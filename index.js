@@ -1,18 +1,19 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const fs = require('fs');
 const { ElvClient } = require("@eluvio/elv-client-js");
-const bs58 = require("bs58");
 const fetch = require('node-fetch');
 const { GenerateMintEntitlement } = require('./src/Entitlement');
 
 const networkName = "demov3"; // or "main"
-// this is using localhost for demov3 dev; a deployed demov3 wallet is: https://media-wallet-dv3.dev.app.eluv.io
-const walletUrl = (networkName === "main") ? "https://media-wallet.dev.app.eluv.io" : "https://elv-test.io:8090";
 
+const walletUrl = (networkName === "main") ? "https://media-wallet.dev.app.eluv.io" : "https://elv-test.io:8090";
+// DEV note: using localhost for demov3 dev; deployed demov3 wallet is: https://media-wallet-dv3.dev.app.eluv.io
+
+let tenant = "iten4TXq2en3qtu3JREnE5tSLRf9zLod"; // paladin
 let marketplaceObjectId = "iq__2dXeKyUVhpcsd1RM6xaC1jdeZpyr"; // A Place for Goats
 
 let client;
+let lastEntitlementJson, lastSignature;
 let code, scope, state;
 
 const port = process.env.PORT || 8080;
@@ -49,13 +50,16 @@ app.get('/app', (req, res) => {
       redirect_uri: 'http://127.0.0.1:8080/app'
     })
   };
-  console.log("fetch options", options);
+  //console.log("fetch options", options);
 
   fetch(url, options)
     .then(response => response.json())
     .then(data => {
-      console.log('Ok:', data);
+      //console.log('Ok:', data);
+      console.log('Ok', data?.access_token?.length);
       const { access_token, id_token, refresh_token } = data;
+
+      // TODO: update the client lib with the access token
 
     })
     .catch(error => console.error('Error:', error));
@@ -63,19 +67,63 @@ app.get('/app', (req, res) => {
   res.sendFile(__dirname + "/app.html");
 })
 
-app.get('/goToWallet', (req, res) => {
-  console.log("goToWallet req", req.url);
-  console.log("goToWallet req.query", req.query);
+app.get('/goToWallet', async (req, res) => {
+  //console.log("goToWallet entitlement", lastEntitlementJson, "signature", lastSignature);
 
-  res.redirect(walletUrl + "/marketplace/" + marketplaceObjectId);
+  // XXX this is just going straight to authd, as we do not yet have an endpoint to submit the entitlement to the wallet
+  const tok = "acspjcT6NoP5Ldxdh6NFpLN6hJuobQXjnwUy8so4ime4nhvR2dSQcXTqbAtsy6Zstt1Gf57Sc5d4R537kDt6AkL5pkEQxjxLYSsTZ65s29JpLTE3RRqmnGU6C8YshrQj3rte2S4LUaiCp9JRME5UezA6b112FGmRBe69bM88AgoZ46dtxAUwodTcT6esqtJdDJEXLEqrPag32rmTkvKywU8aC3YMTTdNV1iANkUnrqEVtPfqhd2PcE3bnXFmzbK4TNe4SKAhB1ciFnnnu97j1SqcEXMXeFNuuEcm6fMaVgdsDRKUT";
+  const url = `http://localhost:6546/wlt/act/${tenant}`;
+  const options = {
+    method: 'POST',
+    headers: {
+      'Authorization': 'Bearer ' + tok,
+    },
+    body: JSON.stringify({"op":"nft-claim-entitlement", "entitlement": lastEntitlementJson, "signature": lastSignature}),
+  };
+  console.log("goToWallet options", options);
+
+  let resp = "";
+  await fetch(url, options)
+    .then(response => response.json())
+    .then(data => {
+      console.log('Ok:', data);
+      resp = JSON.stringify(data);
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      resp = JSON.stringify(error);
+    });
+
+  //res.redirect(walletUrl + "/marketplace/" + marketplaceObjectId);
+  // XXX
+  res.send(`
+      <html>
+        <head>
+          <title>Wallet</title>
+          <link rel="stylesheet" type="text/css" href="/styles.css">
+        </head>
+        <body>
+          <div class="container">
+            <h3>Entitlement submitted to wallet (XXX authd)</h3>
+            <p>Entitlement: ${JSON.stringify(lastEntitlementJson)}</p>
+            <p>Signature: ${lastSignature}</p>
+            <p>Response: ${resp}</p>
+          </div>
+          <div class="container">
+            <a href="/">Return to login</a>
+          </div>
+        </body>
+      </html>
+    `);
 });
 
 app.post('/submitPurchaseId', async (req, res) => {
   const purchaseId = req.body.inputText || '';
   console.log("purchaseId", purchaseId);
 
-
   const { entitlementJson, signature } = await GenerateMintEntitlement(purchaseId);
+  lastEntitlementJson = entitlementJson;
+  lastSignature = signature;
 
   res.send(`
       <html>
@@ -85,16 +133,16 @@ app.post('/submitPurchaseId', async (req, res) => {
         </head>
         <body>
           <div class="container">
-            <h3>This is the signed Entitlement for the purchase</h3>
+            <h3>Signed entitlement for the purchase</h3>
               <p>PurchaseId: ${purchaseId}</p>
               <p>Entitlement: ${JSON.stringify(entitlementJson)}</p>
               <p>Signature: ${signature}</p>
            </div>
            <div class="container">
-              <a href="/goToWallet">Go to media wallet to mint (if needed) and display the item</a>
+              <a href="/goToWallet"><button>Go to item</button></a>
             </div>
            <div class="container">
-              <a href="/app">Buy another</a>
+              <a href="/">Return to login</a>
             </div>
         </body>
       </html>
