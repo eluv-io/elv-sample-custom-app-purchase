@@ -5,9 +5,11 @@ const fetch = require('node-fetch');
 const { GenerateMintEntitlement } = require('./src/Entitlement');
 
 const networkName = "demov3"; // or "main"
-                                                      // localhost for dev; deployed use media-wallet-dv3.dev.app.eluv.io
+
+// localhost for dv3 dev; deployed use media-wallet-dv3.dev.app.eluv.io
 const walletUrl = (networkName === "demov3") ? "https://elv-test.io:8090" : "https://media-wallet.dev.app.eluv.io";
-// Sample configuration
+
+// Sample content
 const tenant = "iten4TXq2en3qtu3JREnE5tSLRf9zLod"; // paladin
 const marketplace= "iq__2dXeKyUVhpcsd1RM6xaC1jdeZpyr"; // A Place for Goats
 
@@ -141,7 +143,7 @@ app.post('/submitPurchaseId', async (req, res) => {
              <p>Signature: ${signature}</p>
           </div>
           <div class="container">
-              <a href="/goToWallet"><button>Go to item</button></a>
+              <a href="/goToWallet"><button>Go to item in media wallet</button></a>
           </div>
           <div class="container">
             <p></p><a href="/entitle">Change entitlement</a></p>
