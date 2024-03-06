@@ -68,9 +68,9 @@ app.get('/app', (req, res) => {
 })
 
 app.get('/goToWallet', async (req, res) => {
-  //console.log("goToWallet entitlement", lastEntitlementJson, "signature", lastSignature);
 
   // XXX this is just going straight to authd, as we do not yet have an endpoint to submit the entitlement to the wallet
+
   const tok = "acspjcT6NoP5Ldxdh6NFpLN6hJuobQXjnwUy8so4ime4nhvR2dSQcXTqbAtsy6Zstt1Gf57Sc5d4R537kDt6AkL5pkEQxjxLYSsTZ65s29JpLTE3RRqmnGU6C8YshrQj3rte2S4LUaiCp9JRME5UezA6b112FGmRBe69bM88AgoZ46dtxAUwodTcT6esqtJdDJEXLEqrPag32rmTkvKywU8aC3YMTTdNV1iANkUnrqEVtPfqhd2PcE3bnXFmzbK4TNe4SKAhB1ciFnnnu97j1SqcEXMXeFNuuEcm6fMaVgdsDRKUT";
   const url = `http://localhost:6546/wlt/act/${tenant}`;
   const options = {
@@ -133,20 +133,20 @@ app.post('/submitPurchaseId', async (req, res) => {
         </head>
         <body>
           <div class="container">
-            <h3>Signed entitlement for the purchase</h3>
-              <p>PurchaseId: ${purchaseId}</p>
-              <p>Entitlement: ${JSON.stringify(entitlementJson)}</p>
-              <p>Signature: ${signature}</p>
-           </div>
-           <div class="container">
+             <h3>Signed entitlement for the purchase</h3>
+             <p>PurchaseId: ${purchaseId}</p>
+             <p>Entitlement: ${JSON.stringify(entitlementJson)}</p>
+             <p>Signature: ${signature}</p>
+          </div>
+          <div class="container">
               <a href="/goToWallet"><button>Go to item</button></a>
-            </div>
-           <div class="container">
+          </div>
+          <div class="container">
               <a href="/">Return to login</a>
-            </div>
+          </div>
         </body>
       </html>
-    `);
+      `);
 });
 
 app.listen(port, host);

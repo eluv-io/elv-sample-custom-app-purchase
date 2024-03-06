@@ -32,10 +32,6 @@ const Entitlement = async({tenant, marketplaceObjectId, sku, amount, nonce, purc
     nonce: nonce,
     purchase_id: purchaseId,
   };
-
-  const jsonString = JSON.stringify(message);
-  console.log("ENTITLEMENT TO SIGN", jsonString);
-  //const sig = await client.Sign(jsonString);
   const sig = await CreateSignedMessageJSON({client, obj: message});
 
   return { entitlementJson: message, signature: sig };
