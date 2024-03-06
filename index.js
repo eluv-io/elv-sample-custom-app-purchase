@@ -62,6 +62,10 @@ app.get('/app', (req, res) => {
   res.sendFile(__dirname + "/app.html");
 })
 
+app.get('/entitle', (req, res) => {
+  res.sendFile(__dirname + "/app.html");
+});
+
 app.get('/goToWallet', async (req, res) => {
 
   // XXX this is just going straight to authd, as we do not yet have an endpoint to submit the entitlement to the wallet
@@ -107,6 +111,9 @@ app.get('/goToWallet', async (req, res) => {
             <p>Response: ${resp}</p>
           </div>
           <div class="container">
+            <a href="/entitle">Add another purchase</a>
+          </div>
+          <div class="container">
             <a href="/">Return to login</a>
           </div>
         </body>
@@ -137,6 +144,9 @@ app.post('/submitPurchaseId', async (req, res) => {
           </div>
           <div class="container">
               <a href="/goToWallet"><button>Go to item</button></a>
+          </div>
+          <div class="container">
+            <a href="/entitle">Add another purchase</a>
           </div>
           <div class="container">
               <a href="/">Return to login</a>
