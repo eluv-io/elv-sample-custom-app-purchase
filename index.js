@@ -5,16 +5,14 @@ const fetch = require('node-fetch');
 const { GenerateMintEntitlement } = require('./src/Entitlement');
 
 const networkName = "demov3"; // or "main"
+                                                      // localhost for dev; deployed use media-wallet-dv3.dev.app.eluv.io
+const walletUrl = (networkName === "demov3") ? "https://elv-test.io:8090" : "https://media-wallet.dev.app.eluv.io";
+// Sample configuration
+const tenant = "iten4TXq2en3qtu3JREnE5tSLRf9zLod"; // paladin
+const marketplace= "iq__2dXeKyUVhpcsd1RM6xaC1jdeZpyr"; // A Place for Goats
 
-const walletUrl = (networkName === "main") ? "https://media-wallet.dev.app.eluv.io" : "https://elv-test.io:8090";
-// DEV note: using localhost for demov3 dev; deployed demov3 wallet is: https://media-wallet-dv3.dev.app.eluv.io
-
-let tenant = "iten4TXq2en3qtu3JREnE5tSLRf9zLod"; // paladin
-let marketplaceObjectId = "iq__2dXeKyUVhpcsd1RM6xaC1jdeZpyr"; // A Place for Goats
-
-let client;
-let lastEntitlementJson, lastSignature;
-let code, scope, state;
+let entitlementJson, signature;
+let code;
 
 const port = process.env.PORT || 8081;
 const host = '127.0.0.1';
@@ -22,7 +20,6 @@ const host = '127.0.0.1';
 const app = express();
 app.use(express.static('src'));
 app.use(express.static('public'));
-// Parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }));
 
 app.get('/', (req, res) => {
@@ -33,8 +30,6 @@ app.get('/app', (req, res) => {
   console.log("app req", req.url);
   console.log("app req.query", req.query);
   code = req.query.code;
-  scope = req.query.scope;
-  state = req.query.state;
 
   const url = "https://frosty-sanderson-jl1xbi88ik.projects.oryapis.com/oauth2/token";
   const options = {
@@ -78,7 +73,7 @@ app.get('/goToWallet', async (req, res) => {
     headers: {
       'Authorization': 'Bearer ' + tok,
     },
-    body: JSON.stringify({"op":"nft-claim-entitlement", "entitlement": lastEntitlementJson, "signature": lastSignature}),
+    body: JSON.stringify({"op":"nft-claim-entitlement", "entitlement": entitlementJson, "signature": signature}),
   };
   console.log("goToWallet options", options);
 
@@ -94,7 +89,9 @@ app.get('/goToWallet', async (req, res) => {
       resp = JSON.stringify(error);
     });
 
+  console.log("goToWallet not yet redirecting to wallet", (walletUrl + "/marketplace/" + marketplace));
   //res.redirect(walletUrl + "/marketplace/" + marketplaceObjectId);
+
   // XXX
   res.send(`
       <html>
@@ -105,8 +102,8 @@ app.get('/goToWallet', async (req, res) => {
         <body>
           <div class="container">
             <h3>Entitlement submitted to wallet (XXX authd)</h3>
-            <p>Entitlement: ${JSON.stringify(lastEntitlementJson)}</p>
-            <p>Signature: ${lastSignature}</p>
+            <p>Entitlement: ${JSON.stringify(entitlementJson)}</p>
+            <p>Signature: ${signature}</p>
             <p>Response: ${resp}</p>
           </div>
           <div class="container">
@@ -121,9 +118,9 @@ app.post('/submitPurchaseId', async (req, res) => {
   const purchaseId = req.body.inputText || '';
   console.log("purchaseId", purchaseId);
 
-  const { entitlementJson, signature } = await GenerateMintEntitlement(purchaseId);
-  lastEntitlementJson = entitlementJson;
-  lastSignature = signature;
+  const e = await GenerateMintEntitlement(purchaseId);
+  entitlementJson = e.entitlementJson;
+  signature = e.signature;
 
   res.send(`
       <html>
