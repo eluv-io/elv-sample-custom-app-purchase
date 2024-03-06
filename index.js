@@ -111,10 +111,8 @@ app.get('/goToWallet', async (req, res) => {
             <p>Response: ${resp}</p>
           </div>
           <div class="container">
-            <a href="/entitle">Add another purchase</a>
-          </div>
-          <div class="container">
-            <a href="/">Return to login</a>
+            <p></p><a href="/entitle">Change entitlement</a></p>
+            <p></p><a href="/">Return to login</a></p>
           </div>
         </body>
       </html>
@@ -146,10 +144,8 @@ app.post('/submitPurchaseId', async (req, res) => {
               <a href="/goToWallet"><button>Go to item</button></a>
           </div>
           <div class="container">
-            <a href="/entitle">Add another purchase</a>
-          </div>
-          <div class="container">
-              <a href="/">Return to login</a>
+            <p></p><a href="/entitle">Change entitlement</a></p>
+            <p></p><a href="/">Return to login</a></p>
           </div>
         </body>
       </html>
