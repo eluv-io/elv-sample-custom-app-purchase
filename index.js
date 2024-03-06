@@ -16,7 +16,7 @@ let client;
 let lastEntitlementJson, lastSignature;
 let code, scope, state;
 
-const port = process.env.PORT || 8080;
+const port = process.env.PORT || 8081;
 const host = '127.0.0.1';
 
 const app = express();
@@ -47,7 +47,7 @@ app.get('/app', (req, res) => {
       client_id: '57c24a6c-0954-411b-849c-2e89a33991da',
       code: code,
       audience: 'https://wltd.svc.eluv.io',
-      redirect_uri: 'http://127.0.0.1:8080/app'
+      redirect_uri: 'http://' + host + ':' + port + '/app'
     })
   };
   //console.log("fetch options", options);
