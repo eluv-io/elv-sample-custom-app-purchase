@@ -7,14 +7,13 @@ Sample app illustrating custom auth and media wallet entitlement flows
 Install with:
 
 ```bash
-npm i '@eluvio/elv-client-js'
 npm install
 ```
 
 Run with:
 
 ```bash
-export PRIVATE_KEY=0x659...6214
+export PRIVATE_KEY=0x111... # The purchasing/entitlement authority's key, not a user key
 npm start
 ```
 
