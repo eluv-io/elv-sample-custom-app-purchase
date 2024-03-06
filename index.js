@@ -4,16 +4,16 @@ const fs = require('fs');
 const { ElvClient } = require("@eluvio/elv-client-js");
 const bs58 = require("bs58");
 const fetch = require('node-fetch');
+const { GenerateMintEntitlement } = require('./src/Entitlement');
+
+const networkName = "demov3"; // or "main"
+// this is using localhost for demov3 dev; a deployed demov3 wallet is: https://media-wallet-dv3.dev.app.eluv.io
+const walletUrl = (networkName === "main") ? "https://media-wallet.dev.app.eluv.io" : "https://elv-test.io:8090";
+
+let marketplaceObjectId = "iq__2dXeKyUVhpcsd1RM6xaC1jdeZpyr"; // A Place for Goats
 
 let client;
 let code, scope, state;
-
-/* Sample configuration */
-let tenant = "iten4TXq2en3qtu3JREnE5tSLRf9zLod"; // paladin
-let marketplaceObjectId = "iq__2dXeKyUVhpcsd1RM6xaC1jdeZpyr"; // A Place for Goats
-let sku = "C9Zct19CoEAZYWug9tyavX"; // Goat Pack One
-let amount = 1;
-let nonce = "nonce_6f9f53ecc09a7e223cf7d47f";
 
 const port = process.env.PORT || 8080;
 const host = '127.0.0.1';
@@ -63,99 +63,43 @@ app.get('/app', (req, res) => {
   res.sendFile(__dirname + "/app.html");
 })
 
-app.get('/ory', (req, res) => {
-  console.log("ory req", req.url);
-  console.log("ory req.query", req.query);
-  res.send("ory");
+app.get('/goToWallet', (req, res) => {
+  console.log("goToWallet req", req.url);
+  console.log("goToWallet req.query", req.query);
+
+  res.redirect(walletUrl + "/marketplace/" + marketplaceObjectId);
 });
 
 app.post('/submitPurchaseId', async (req, res) => {
   const purchaseId = req.body.inputText || '';
   console.log("purchaseId", purchaseId);
 
-  const { entitlementJson, signature } = await generateMintEntitlement(purchaseId);
+
+  const { entitlementJson, signature } = await GenerateMintEntitlement(purchaseId);
 
   res.send(`
-        <html>
+      <html>
         <head>
           <title>Entitlement</title>
           <link rel="stylesheet" type="text/css" href="/styles.css">
         </head>
         <body>
           <div class="container">
-            <h3>Entitlement</h3>
+            <h3>This is the signed Entitlement for the purchase</h3>
               <p>PurchaseId: ${purchaseId}</p>
               <p>Entitlement: ${JSON.stringify(entitlementJson)}</p>
               <p>Signature: ${signature}</p>
            </div>
            <div class="container">
+              <a href="/goToWallet">Go to media wallet to mint (if needed) and display the item</a>
+            </div>
+           <div class="container">
               <a href="/app">Buy another</a>
             </div>
         </body>
-        </html>
+      </html>
     `);
 });
 
 app.listen(port, host);
 console.log(`Running on http://${host}:${port}`);
-
-
-
-/**
- * Generate a mint entitlement
- *
- * @param {string} tenant - tenant ID in 'iten' format
- * @param {string} marketplaceObjectId - marketplace object ID in 'iq__' format
- * @param {string} sku - SKU of the item
- * @param {number} amount - number of items of that SKU
- * @returns {Promise<Object>} - the entitlement JSON and signature
- */
-const Entitlement = async({tenant, marketplaceObjectId, sku, amount, nonce, purchaseId}) => {
-  const message = {
-    tenant_id: tenant,
-    marketplace_id: marketplaceObjectId,
-    items: [ { sku: sku, amount: amount } ],
-    nonce: nonce,
-    purchase_id: purchaseId,
-  };
-
-  const jsonString = JSON.stringify(message);
-  console.log("ENTITLEMENT TO SIGN", jsonString);
-  const sig = await client.Sign(jsonString);
-
-  return { entitlementJson: message, signature: sig };
-};
-
-
-async function generateMintEntitlement(purchaseId) {
-  try {
-    // Initialize client using environment variable PRIVATE_KEY
-    client = await ElvClient.FromNetworkName({networkName: "demov3"});
-
-    let wallet = client.GenerateWallet();
-    let signer = wallet.AddAccount({
-      privateKey: process.env.PRIVATE_KEY
-    });
-    client.SetSigner({signer});
-    client.ToggleLogging(false);
-    console.log("SIGNER", client.CurrentAccountAddress());
-
-    tenant = process.argv[2] ?? tenant;
-    marketplaceObjectId = process.argv[3] ?? marketplaceObjectId;
-    sku = process.argv[4] ?? sku;
-    if (process.argv[5]) { amount = parseInt(process.argv[5]); };
-    nonce = process.argv[6] ?? nonce;
-    purchaseId = process.argv[7] ?? purchaseId;
-
-    const { entitlementJson, signature } =
-      await Entitlement({tenant, marketplaceObjectId, sku, amount, nonce, purchaseId});
-    console.log("ENTITLEMENT", entitlementJson);
-    console.log("ENTITLEMENT_SIGNATURE", signature);
-
-    return {entitlementJson, signature};
-
-  } catch (e) {
-    console.error("ERROR:", e);
-    return {};
-  }
-}
