@@ -10,7 +10,7 @@ let client;
 // let amount = 1;
 
 /* Sample main configuration */
-let tenant = "iten4T34qbBbm6qEWMqnmqrkPZ38MVB8";
+let tenant = "iten34Y7Tzso2mRqhzZ6yJDZs2Sqf8L";
 let marketplace = "iq__D3N77Nw1ATwZvasBNnjAQWeVLWV";
 let sku = "5MmuT4t6RoJtrT9h1yTnos";
 let amount = 1;
