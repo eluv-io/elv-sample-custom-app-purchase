@@ -92,13 +92,26 @@ app.get('/app', (req, res) => {
       console.log('Ok, decoded id_token', parsed);
       user = parsed.sub;
     })
-    .catch(error => console.error('Error:', error));
+    .catch(error => console.error('Error:', error))
+    .finally(() => {
+      res.send(body.replaceAll("{{idToken}}", idToken));
+    });
 
-  res.send(`
+  let body = `
   <html>
     <head>
       <title>App</title>
       <link rel="stylesheet" type="text/css" href="styles.css">
+      <script>
+        function showHide() {
+          const x = document.getElementById("token");
+          if (x.style.display === "none") {
+            x.style.display = "block";
+          } else {
+            x.style.display = "none";
+          }
+        }
+      </script>
     </head>
     <body>
       <div class="container">
@@ -112,11 +125,17 @@ app.get('/app', (req, res) => {
           </form>
         </p>
       </div>
-          <div class="container">
-            <p></p><a href="` + serviceUrl + `">Return to login</a></p>
-          </div>
+      <div class="container">
+        <button onclick="showHide();">Show/Hide ID token</button>
+        <div id="token" style="display: none">
+          <p><b>ID token:</b> {{idToken}} </p>
+        </div>
+      </div>
+      <div class="container">
+        <p></p><a href="` + serviceUrl + `">Return to login</a></p>
+      </div>
     </body>
-  </html>`);
+  </html>`;
 })
 
 app.get('/entitle', (req, res) => {
@@ -243,8 +262,8 @@ if (process.env.SERVICE_URL != "") {
 
 app.listen(port, host);
 console.log(`Running on http://${host}:${port}`);
-
 console.log("SERVICE_URL", process.env.SERVICE_URL);
+console.log("walletUrl", walletUrl);
 if (!process.env.PRIVATE_KEY) {
   console.log("missing PRIVATE_KEY");
 }
