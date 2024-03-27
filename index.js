@@ -62,7 +62,7 @@ app.get('/app', (req, res) => {
   console.log("login callback req.query", req.query);
   code = req.query.code;
 
-  const url = "https://ory.svc.contentfabric.io/oauth2/auth?" +
+  const url = "https://ory.svc.contentfabric.io/oauth2/token?" +
   const options = {
     method: 'POST',
     headers: {
