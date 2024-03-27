@@ -259,13 +259,11 @@ app.post('/submitPurchaseId', async (req, res) => {
           <div class="container">
               <a href="goToWallet"><button>Go to item in media wallet</button></a>
           </div>
-           <div class="container">
+          <div class="container">
             <button onclick="showHide();">Show/Hide ID token</button>
             <div id="token" style="display: none">
               <p><b>ID token:</b>` + idToken + `</p>
             </div>
-          </div>
-          <div class="container">
             <p></p><a href="entitle">Change entitlement</a></p>
             <p></p><a href="` + serviceUrl + `">Return to login</a></p>
           </div>
