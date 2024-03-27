@@ -26,7 +26,8 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use("/gen-entitlement", bodyParser.json());
 
 app.get('/', (req, res) => {
-  let baseUrl = "https://frosty-sanderson-jl1xbi88ik.projects.oryapis.com/oauth2/auth?" +
+
+  let baseUrl = "https://ory.svc.contentfabric.io/oauth2/auth?" +
     "audience=https%3A%2F%2Fwltd.stg.svc.eluv.io&client_id=57c24a6c-0954-411b-849c-2e89a33991da&max_age=0&prompt=&redirect_uri=" +
     encodeURIComponent(serviceUrl) + "%2Fapp&response_type=code&scope=openid";
   const nonce = "0001-0002-0003";
@@ -61,7 +62,7 @@ app.get('/app', (req, res) => {
   console.log("login callback req.query", req.query);
   code = req.query.code;
 
-  const url = "https://frosty-sanderson-jl1xbi88ik.projects.oryapis.com/oauth2/token";
+  const url = "https://ory.svc.contentfabric.io/oauth2/auth?" +
   const options = {
     method: 'POST',
     headers: {
