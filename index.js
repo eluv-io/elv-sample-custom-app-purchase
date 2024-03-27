@@ -8,7 +8,6 @@ const { GenerateEntitlement, GenerateDefaultEntitlement, GetWalletItemPath } = r
 const networkName = "main"; // "main" or "demov3"
 const walletUrl = (networkName === "demov3") ? "https://media-wallet-dv3.dev.app.eluv.io" : "https://media-wallet.dev.app.eluv.io";
 
-
 let entitlementJson, signature;
 let code; // oauth callback "code", which is exchanged to get the access token
 let idToken; // id token from the oauth2/token endpoint that accepts "code"
@@ -239,6 +238,16 @@ app.post('/submitPurchaseId', async (req, res) => {
         <head>
           <title>Entitlement</title>
           <link rel="stylesheet" type="text/css" href="styles.css">
+          <script>
+            function showHide() {
+              const x = document.getElementById("token");
+              if (x.style.display === "none") {
+                x.style.display = "block";
+              } else {
+                x.style.display = "none";
+              }
+            }
+          </script>
         </head>
         <body>
           <div class="container">
@@ -249,6 +258,12 @@ app.post('/submitPurchaseId', async (req, res) => {
           </div>
           <div class="container">
               <a href="goToWallet"><button>Go to item in media wallet</button></a>
+          </div>
+           <div class="container">
+            <button onclick="showHide();">Show/Hide ID token</button>
+            <div id="token" style="display: none">
+              <p><b>ID token:</b>` + idToken + `</p>
+            </div>
           </div>
           <div class="container">
             <p></p><a href="entitle">Change entitlement</a></p>
