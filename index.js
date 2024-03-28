@@ -6,7 +6,7 @@ const fetch = require('node-fetch');
 const { GenerateEntitlement, GenerateDefaultEntitlement, GetWalletItemPath } = require('./src/Entitlement');
 
 const networkName = "main"; // "main" or "demov3"
-const walletUrl = (networkName === "demov3") ? "https://media-wallet-dv3.dev.app.eluv.io" : "https://media-wallet.dev.app.eluv.io";
+const walletUrl = (networkName === "demov3") ? "https://media-wallet-dv3.dev.app.eluv.io" : "https://media-wallet.dev.contentfabric.io";
 
 let entitlementJson, signature;
 let code; // oauth callback "code", which is exchanged to get the access token
