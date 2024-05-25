@@ -272,7 +272,7 @@ app.post('/submitPurchaseId', async (req, res) => {
 });
 
 serviceUrl = 'http://' + host + ':' + port;
-if (process.env.SERVICE_URL != "") {
+if (process.env.SERVICE_URL != undefined && process.env.SERVICE_URL != "") {
   serviceUrl = process.env.SERVICE_URL;
   serviceUrl = serviceUrl.replace(/\/$/, "");
 }
