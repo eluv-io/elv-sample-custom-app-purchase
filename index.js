@@ -27,10 +27,13 @@ app.use("/gen-entitlement", bodyParser.json());
 
 app.get('/', (req, res) => {
 
-  let baseUrl = "https://frosty-sanderson-jl1xbi88ik.projects.oryapis.com/oauth2/auth?" +
-  //let baseUrl = "https://ory.svc.contentfabric.io/oauth2/auth?" +
-    "audience=https%3A%2F%2Fwltd.stg.svc.eluv.io&client_id=57c24a6c-0954-411b-849c-2e89a33991da&max_age=0&prompt=&redirect_uri=" +
-    encodeURIComponent(serviceUrl) + "%2Fapp&response_type=code&scope=openid";
+
+  let baseUrl = "https://frosty-sanderson-jl1xbi88ik.projects.oryapis.com/oauth2/auth?";
+  //let baseUrl = "https://eloquent-carson-yt726m2tf6.projects.oryapis.com/oauth2/auth?";
+  //let baseUrl = "https://ory.svc.contentfabric.io/oauth2/auth?";
+  baseUrl += "audience=https%3A%2F%2Fwltd.stg.svc.eluv.io&client_id=57c24a6c-0954-411b-849c-2e89a33991da";
+  baseUrl += "&max_age=0&prompt=&redirect_uri=";
+  baseUrl += encodeURIComponent(serviceUrl) + "%2Fapp&response_type=code&scope=openid";
   const nonce = "0001-0002-0003";
   const state = "SAMPLE-0001-0002";
 
@@ -64,6 +67,7 @@ app.get('/app', (req, res) => {
   code = req.query.code;
 
   const url = "https://frosty-sanderson-jl1xbi88ik.projects.oryapis.com/oauth2/token";
+  //const url = "https://eloquent-carson-yt726m2tf6.projects.oryapis.com/oauth2/token";
   //const url = "https://ory.svc.contentfabric.io/oauth2/token?";
   const options = {
     method: 'POST',
@@ -177,12 +181,12 @@ app.get('/goToWallet', async (req, res) => {
   // ?auth=<B64("{ idToken: <token>, signerURIs: <?>, user: { email: <email> } }")>
   const authInfo = {
     idToken: idToken,
-    signerURIs: "https://wlt.stg.svc.eluv.io",
+    signerURIs: ["https://wlt.stg.svc.eluv.io"],
     user: { email: user }
   };
   const b64 = Buffer.from(JSON.stringify(authInfo)).toString('base64');
 
-  const redirect = walletUrl + "/marketplace/" + marketplace_id + "/store/" + sku + "/entitle/" + signature + "?auth=" + b64
+  const redirect = walletUrl + "/marketplace/" + marketplace_id + "/store/" + sku + "/entitle/" + signature + "?authId=" + b64
   console.log("goToWallet redirect", redirect);
 
   // this res.redirect is not working on the deployed version, so, we are using the meta refresh
