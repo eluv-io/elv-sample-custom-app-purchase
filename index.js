@@ -178,15 +178,27 @@ app.get('/goToWallet', async (req, res) => {
   const {tenant_id, marketplace_id, items, user, purchase_id} = decode?.message;
   const sku = items[0].sku;
 
-  // ?auth=<B64("{ idToken: <token>, signerURIs: <?>, user: { email: <email> } }")>
+  // ?authId=<B64("{ idToken: <token>, signerURIs: [<?>], user: { email: <email> } }")>
   const authInfo = {
     idToken: idToken,
     signerURIs: ["https://wlt.stg.svc.eluv.io"],
     user: { email: user }
   };
-  const b64 = Buffer.from(JSON.stringify(authInfo)).toString('base64');
 
-  const redirect = walletUrl + "/marketplace/" + marketplace_id + "/store/" + sku + "/entitle/" + signature + "?authId=" + b64
+  const newJsonFormat = {
+    id:"entitlement-" + purchase_id,
+    gate:false,
+    type:"entitlement",
+    permissionItemIds: ["prmo7RbfTFK7vCqNssKcBAXBJ2"],
+    purchaseId: purchase_id,
+    entitlementSignature: signature,
+  };
+
+  const b64 = Buffer.from(JSON.stringify(authInfo)).toString('base64');
+  const entitle_b64 = Buffer.from(JSON.stringify(newJsonFormat)).toString('base64');
+
+  //const redirect = walletUrl + "/marketplace/" + marketplace_id + "/store/" + sku + "/entitle/" + signature + "?authId=" + b64
+  const redirect = walletUrl + "/entitlement-sample?p=" + entitle_b64 + "?authId=" + b64
   console.log("goToWallet redirect", redirect);
 
   // this res.redirect is not working on the deployed version, so, we are using the meta refresh
