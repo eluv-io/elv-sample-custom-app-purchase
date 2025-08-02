@@ -4,9 +4,11 @@ const { ElvClient } = require("@eluvio/elv-client-js");
 const { Utils } = require("@eluvio/elv-client-js/src/Utils");
 const fetch = require('node-fetch');
 const { GenerateEntitlement, GenerateDefaultEntitlement, GetWalletItemPath } = require('./src/Entitlement');
+const { B58 } = require('./src/b58');
 
 const networkName = "main"; // "main" or "demov3"
-const walletUrl = (networkName === "demov3") ? "https://media-wallet-dv3.dev.app.eluv.io" : "https://media-wallet.dev.contentfabric.io";
+const walletUrl = (networkName === "demov3") ?
+  "https://media-wallet-dv3.dev.app.eluv.io" : "https://media-wallet.dev.contentfabric.io";
 
 let entitlementJson, signature;
 let code; // oauth callback "code", which is exchanged to get the access token
@@ -175,8 +177,7 @@ app.get('/goToWallet', async (req, res) => {
   const client = await ElvClient.FromNetworkName({networkName: networkName});
   const decode = await client.DecodeSignedMessageJSON({signedMessage: signature});
   decode?.message && console.log("EntitlementClaim message: " + JSON.stringify(decode.message));
-  const {tenant_id, marketplace_id, items, user, purchase_id} = decode?.message;
-  const sku = items[0].sku;
+  const {tenant_id, user, media_property, permissionItemIds, purchase_id} = decode?.message;
 
   // ?authId=<B64("{ idToken: <token>, signerURIs: [<?>], user: { email: <email> } }")>
   const authInfo = {
@@ -187,18 +188,20 @@ app.get('/goToWallet', async (req, res) => {
 
   const newJsonFormat = {
     id:"entitlement-" + purchase_id,
-    gate:false,
-    type:"entitlement",
-    permissionItemIds: ["prmo7RbfTFK7vCqNssKcBAXBJ2"],
+    gate: false,
+    type: "entitlement",
+    permissionItemIds: permissionItemIds,
     purchaseId: purchase_id,
     entitlementSignature: signature,
   };
 
-  const b64 = Buffer.from(JSON.stringify(authInfo)).toString('base64');
-  const entitle_b64 = Buffer.from(JSON.stringify(newJsonFormat)).toString('base64');
+  const auth_b64 = Buffer.from(JSON.stringify(authInfo)).toString('base64');
+  //const auth_b58 = B58(JSON.stringify(authInfo));
+  const entitle_b58 = B58(JSON.stringify(newJsonFormat));
 
-  //const redirect = walletUrl + "/marketplace/" + marketplace_id + "/store/" + sku + "/entitle/" + signature + "?authId=" + b64
-  const redirect = walletUrl + "/entitlement-sample?p=" + entitle_b64 + "?authId=" + b64
+  const redirect = walletUrl + "/" + media_property + "?p=" + entitle_b58 + "&authId=" + auth_b64
+  console.log("goToWallet authInfo", authInfo);
+  console.log("goToWallet entitlementInfo", newJsonFormat);
   console.log("goToWallet redirect", redirect);
 
   // this res.redirect is not working on the deployed version, so, we are using the meta refresh
@@ -215,7 +218,7 @@ app.get('/goToWallet', async (req, res) => {
 
 app.post('/gen-entitlement', async (req, res) => {
   console.log("gen-entitlement", req.body)
-  let { tenant_id, marketplace_id, sku, purchase_id } = req.body;
+  let { tenant_id, media_property, permission_item, purchase_id } = req.body;
 
   let user;
   const authToken = req.headers.authorization;
@@ -234,7 +237,7 @@ app.post('/gen-entitlement', async (req, res) => {
     return;
   }
 
-  const e = await GenerateEntitlement(tenant_id, marketplace_id, sku, user, purchase_id);
+  const e = await GenerateEntitlement(tenant_id, media_property, permission_item, user, purchase_id);
   entitlementJson = e.entitlementJson;
   signature = e.signature;
 

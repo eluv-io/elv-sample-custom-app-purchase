@@ -5,33 +5,36 @@ let client;
 
 /* Sample dv3 configuration */
 // let tenant = "iten4TXq2en3qtu3JREnE5tSLRf9zLod";
-// let marketplace = "iq__2dXeKyUVhpcsd1RM6xaC1jdeZpyr";
-// let sku = "C9Zct19CoEAZYWug9tyavX";
-// let amount = 1;
+// let media_property = "goats-media-property";
+// let permission_item = "prmoTWPcwpnjSkMRwK4fQs5TrH";
+
 
 /* Sample main configuration */
 let tenant = "iten34Y7Tzso2mRqhzZ6yJDZs2Sqf8L";
-let marketplace = "iq__D3N77Nw1ATwZvasBNnjAQWeVLWV";
-let sku = "5MmuT4t6RoJtrT9h1yTnos";
-let amount = 1;
+let media_property = "entitlement-sample";
+let permission_item = "prmo7RbfTFK7vCqNssKcBAXBJ2";
 
 /**
  * Generate a mint entitlement
  *
  * @param {string} tenant - tenant ID in 'iten' format
- * @param {string} marketplace - marketplace object ID in 'iq__' format
- * @param {string} sku - SKU of the item
- * @param {number} amount - number of items of that SKU
+ * @param {string} media_property - media_property slug
+ * @param {string} permission_item - permission_item of the item in 'prm__' format
  * @param {string} user - user ID in any format, usually the 'sub' of the id/access token; an email, username, address, etc.
+ * @param {string} purchase_id - ID for the purchase, can be any string, but should be unique for each purchase
  * @returns {Promise<Object>} - the entitlement JSON and signature
  */
-const Entitlement = async({tenant, marketplace, sku, amount, user, purchaseId}) => {
+const Entitlement = async({tenant, media_property, permission_item, user, purchase_id}) => {
   const message = {
+    id: "entitlement-" + purchase_id,
+    gate: false,
+    type: "entitlement",
     tenant_id: tenant,
-    marketplace_id: marketplace,
-    items: [ { sku: sku, amount: amount } ],
+    media_property: media_property,
+    permissionItemIds: [permission_item],
     user: user,
-    purchase_id: purchaseId,
+    purchase_id: purchase_id,
+    purchaseId: purchase_id,
   };
   let sig;
   try {
@@ -43,7 +46,7 @@ const Entitlement = async({tenant, marketplace, sku, amount, user, purchaseId}) 
   return { entitlementJson: message, signature: sig };
 };
 
-async function GenerateEntitlement(tenant, marketplace, sku, user, purchaseId) {
+async function GenerateEntitlement(tenant, media_property, permission_item, user, purchase_id) {
   try {
     // Initialize client using environment variable PRIVATE_KEY
     client = await ElvClient.FromNetworkName({networkName: networkName});
@@ -57,7 +60,7 @@ async function GenerateEntitlement(tenant, marketplace, sku, user, purchaseId) {
     console.log("SIGNER", client.CurrentAccountAddress());
 
     const { entitlementJson, signature } =
-      await Entitlement({tenant, marketplace, sku, amount, user, purchaseId});
+      await Entitlement({tenant, media_property, permission_item, user, purchase_id});
     console.log("ENTITLEMENT", entitlementJson);
     console.log("ENTITLEMENT_SIGNATURE", signature);
 
@@ -70,11 +73,11 @@ async function GenerateEntitlement(tenant, marketplace, sku, user, purchaseId) {
 }
 
 async function GenerateDefaultEntitlement(user, purchaseId) {
-  return GenerateEntitlement(tenant, marketplace, sku, user, purchaseId);
+  return GenerateEntitlement(tenant, media_property, permission_item, user, purchaseId);
 }
 
 function GetWalletItemPath(walletUrl) {
-     return walletUrl + "/marketplace/" + marketplace + "/store/" + sku + "?mid=" + marketplace;
+     return walletUrl + "/marketplace/" + media_property + "?p=";
 }
 
 module.exports = {
